@@ -1,5 +1,7 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
+import { jsPDF } from "jspdf";
+import socket from "../socket"; //  Socket.IO import
 
 const Checkout = () => {
   const { cartItems, removeFromCart, clearCart } = useContext(CartContext);
@@ -7,6 +9,25 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
 
   const total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+
+  const generateReceipt = (receiptId) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Easymob POS - Receipt", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Receipt ID: ${receiptId}`, 20, 30);
+    doc.text(`Payment Method: ${payment}`, 20, 38);
+    doc.text(`Date: ${new Date().toLocaleString()}`, 20, 46);
+
+    let y = 60;
+    cartItems.forEach((item, index) => {
+      doc.text(`${index + 1}. ${item.name} - Ksh ${item.price}`, 20, y);
+      y += 8;
+    });
+
+    doc.text(`Total: Ksh ${total.toFixed(2)}`, 20, y + 10);
+    doc.save(`receipt_${receiptId}.pdf`);
+  };
 
   const handleConfirm = async () => {
     if (cartItems.length === 0) {
@@ -29,12 +50,20 @@ const Checkout = () => {
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to confirm purchase");
-      }
-
+      if (!res.ok) throw new Error("Failed to confirm purchase");
       const data = await res.json();
+
+      //  Real-time sale event
+      socket.emit("sale-made", {
+        id: data.id,
+        items: cartItems,
+        total,
+        paymentMethod: payment,
+        date: new Date().toISOString(),
+      });
+
       alert(` Purchase saved! Receipt ID: ${data.id}`);
+      generateReceipt(data.id);
       clearCart();
     } catch (err) {
       alert("❌ Error: " + err.message);
@@ -86,7 +115,7 @@ const Checkout = () => {
             >
               <option value="cash">Cash</option>
               <option value="mpesa">M-Pesa</option>
-              <option value="bank">Bank</option>
+              <option value="visa">Visa Card</option>
             </select>
           </div>
 
@@ -97,7 +126,7 @@ const Checkout = () => {
               className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
               disabled={loading}
             >
-              {loading ? "Processing..." : "Confirm Purchase"}
+              {loading ? "Processing..." : "Confirm Purchase & Download Receipt"}
             </button>
           </div>
         </div>

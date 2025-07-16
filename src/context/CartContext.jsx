@@ -1,7 +1,7 @@
 // src/context/CartContext.jsx
 import { createContext, useState } from 'react';
 
-// ✅ Correct name and capitalization
+// Correct name and capitalization
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {

@@ -12,7 +12,13 @@ import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import Sales from "./pages/Sales";
 import Login from "./pages/Login";
-import { CartProvider } from "./context/CartContext";
+import Socketio from "socket.io-client";
+
+const socket = Socketio("http://localhost:5000"); // Connect to the Socket.IO server
+// Listen for cart updates
+socket.on("cart-updated", (cart) => {
+  console.log("Cart updated:", cart);
+});
 
 // Layout wrapper to handle conditional Sidebar
 const Layout = ({ children }) => {
@@ -36,10 +42,10 @@ const App = () => {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/sales" element={<Sales/>} />
+          <Route path="/Checkout" element={<Checkout />} />
+          <Route path="/Sales" element={<Sales />} />
         </Routes>
       </Layout>
     </Router>

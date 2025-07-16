@@ -15,6 +15,25 @@ router.get("/", verifyToken, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+module.exports = (sequelize, DataTypes) => {
+  const Product = sequelize.define("Product", {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price: DataTypes.FLOAT,
+    category: DataTypes.STRING,
+    image: DataTypes.TEXT,
+    serial: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+  });
+
+  return Product;
+};
+
 
 // ✅ POST: Add product to logged-in business
 router.post("/", verifyToken, async (req, res) => {
