@@ -1,4 +1,3 @@
-// context/CartContext.js
 import React, { createContext, useState } from "react";
 
 export const CartContext = createContext();
@@ -6,8 +5,8 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  const addToCart = (item) => {
-    setCartItems((prev) => [...prev, item]);
+  const addToCart = (product) => {
+    setCartItems((prev) => [...prev, product]);
   };
 
   const removeFromCart = (id) => {
@@ -18,11 +17,14 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
+  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, clearCart, total }}
+    >
       {children}
     </CartContext.Provider>
   );
 };
-export default CartProvider;
-// This context can be used to manage the cart state across the application.
+ 

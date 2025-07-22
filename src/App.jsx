@@ -15,7 +15,7 @@ import Sales from "./pages/Sales";
 import Login from "./pages/Login";
 import Inventory from "./pages/Inventory";
 import Reports from "./pages/Reports";
-import CartProvider from "./context/CartContext";
+import { CartProvider } from "./context/CartContext";
 import Header from "./components/Header";
 import BusinessRegister from "./pages/BusinessRegister";
 
@@ -37,23 +37,24 @@ const Layout = ({ children }) => {
 
 const App = () => {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/sales" element={<Sales />} />
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/business-register" element={<BusinessRegister />} />
-          <Route path="/header" element={<Header />} />
-          <Route path="/cart" element={<CartProvider />} />
-          <Route path="/" element={<Dashboard />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <CartProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/business-register" element={<BusinessRegister />} />
+            <Route path="/header" element={<Header />} />
+            <Route path="/" element={<Dashboard />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </CartProvider>
   );
 };
 
