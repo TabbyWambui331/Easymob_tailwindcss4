@@ -65,6 +65,15 @@ const Sidebar = () => {
             <FaChartLine />
             Sales
           </NavLink>
+          <NavLink to="/inventory" className={linkClasses} onClick={() => setOpen(false)}>
+            <FaBoxOpen />
+            Inventory
+          </NavLink>
+          <NavLink to="/reports" className={linkClasses} onClick={() => setOpen(false)}>
+            <FaChartLine />
+            Reports
+          </NavLink>
+          
           <button
             onClick={() => {
               logout();

@@ -1,16 +1,28 @@
-// src/context/CartContext.jsx
-import { createContext, useState } from 'react';
+// context/CartContext.js
+import React, { createContext, useState } from "react";
 
-// Correct name and capitalization
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
+  const addToCart = (item) => {
+    setCartItems((prev) => [...prev, item]);
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, setCartItems }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );
 };
-// src/pages/CartContext.jsx
+export default CartProvider;
+// This context can be used to manage the cart state across the application.

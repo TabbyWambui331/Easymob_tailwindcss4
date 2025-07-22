@@ -1,3 +1,4 @@
+// App.jsx
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -12,22 +13,20 @@ import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import Sales from "./pages/Sales";
 import Login from "./pages/Login";
-import Socketio from "socket.io-client";
+import Inventory from "./pages/Inventory";
+import Reports from "./pages/Reports";
+import CartProvider from "./context/CartContext";
+import Header from "./components/Header";
+import BusinessRegister from "./pages/BusinessRegister";
 
-const socket = Socketio("http://localhost:5000"); // Connect to the Socket.IO server
-// Listen for cart updates
-socket.on("cart-updated", (cart) => {
-  console.log("Cart updated:", cart);
-});
-
-// Layout wrapper to handle conditional Sidebar
+// Layout wrapper to conditionally show Sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideSidebarOn = ["/login"];
+  const hideSidebarOn = ["/login", "/business-register"];
   const shouldShowSidebar = !hideSidebarOn.includes(location.pathname);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-100">
       {shouldShowSidebar && <Sidebar />}
       <main className={`flex-1 p-4 ${shouldShowSidebar ? "ml-64" : ""}`}>
         {children}
@@ -42,10 +41,16 @@ const App = () => {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/Checkout" element={<Checkout />} />
-          <Route path="/Sales" element={<Sales />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/business-register" element={<BusinessRegister />} />
+          <Route path="/header" element={<Header />} />
+          <Route path="/cart" element={<CartProvider />} />
+          <Route path="/" element={<Dashboard />} />
         </Routes>
       </Layout>
     </Router>

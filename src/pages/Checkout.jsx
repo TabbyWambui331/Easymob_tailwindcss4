@@ -1,113 +1,92 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { jsPDF } from "jspdf";
-import socket from "../socket"; //  Socket.IO import
+import socket from "../socket";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "./firebase";
 
 const Checkout = () => {
-  const { cartItems, removeFromCart, clearCart } = useContext(CartContext);
+  const { cartItems, total, clearCart, removeFromCart } = useContext(CartContext);
   const [payment, setPayment] = useState("cash");
   const [loading, setLoading] = useState(false);
 
-  const total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
-
-  const generateReceipt = (receiptId) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Easymob POS - Receipt", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Receipt ID: ${receiptId}`, 20, 30);
-    doc.text(`Payment Method: ${payment}`, 20, 38);
-    doc.text(`Date: ${new Date().toLocaleString()}`, 20, 46);
-
-    let y = 60;
-    cartItems.forEach((item, index) => {
-      doc.text(`${index + 1}. ${item.name} - Ksh ${item.price}`, 20, y);
-      y += 8;
-    });
-
-    doc.text(`Total: Ksh ${total.toFixed(2)}`, 20, y + 10);
-    doc.save(`receipt_${receiptId}.pdf`);
-  };
-
   const handleConfirm = async () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty");
+      alert("Cart is empty");
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const res = await fetch("http://localhost:5000/api/sales", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          items: cartItems,
-          total,
-          paymentMethod: payment,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to confirm purchase");
-      const data = await res.json();
-
-      //  Real-time sale event
-      socket.emit("sale-made", {
-        id: data.id,
+      const docRef = await addDoc(collection(db, "sales"), {
         items: cartItems,
         total,
         paymentMethod: payment,
-        date: new Date().toISOString(),
+        createdAt: serverTimestamp(),
       });
 
-      alert(` Purchase saved! Receipt ID: ${data.id}`);
-      generateReceipt(data.id);
+      alert(`✅ Purchase completed! Receipt ID: ${docRef.id}`);
+      generateReceipt(docRef.id);
       clearCart();
     } catch (err) {
-      alert("❌ Error: " + err.message);
+      alert("❌ Error saving to Firebase: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const generateReceipt = (id) => {
+    const doc = new jsPDF();
+    doc.text("🧾 EasyMobPOS Receipt", 10, 10);
+    doc.text(`Receipt ID: ${id}`, 10, 20);
+
+    cartItems.forEach((item, i) => {
+      doc.text(`${i + 1}. ${item.name} - Ksh ${item.price}`, 10, 30 + i * 10);
+    });
+
+    doc.text(`Total: Ksh ${total}`, 10, 30 + cartItems.length * 10 + 10);
+    doc.save("receipt.pdf");
+  };
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-blue-700">🛒 Checkout</h2>
+    <div className="px-4 py-6 max-w-6xl mx-auto text-blue-800">
+      <h2 className="text-2xl md:text-3xl font-bold mb-6">🛍️ Checkout</h2>
 
       {cartItems.length === 0 ? (
-        <p className="text-gray-500">No items in cart.</p>
+        <p className="text-gray-500 text-lg">No items in cart.</p>
       ) : (
-        <div className="bg-white rounded shadow p-4">
-          <table className="w-full mb-4">
-            <thead>
-              <tr className="text-left bg-gray-100">
-                <th className="p-2">Product</th>
-                <th className="p-2">Price</th>
-                <th className="p-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartItems.map((item) => (
-                <tr key={item.id} className="border-t hover:bg-gray-50">
-                  <td className="p-2">{item.name}</td>
-                  <td className="p-2">Ksh {item.price}</td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-600 hover:underline text-sm"
-                    >
-                      Remove
-                    </button>
-                  </td>
+        <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto border mb-6 text-sm md:text-base">
+              <thead className="bg-blue-100 text-left">
+                <tr>
+                  <th className="p-3">Product</th>
+                  <th className="p-3">Price</th>
+                  <th className="p-3">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cartItems.map((item) => (
+                  <tr key={item.id} className="border-t hover:bg-gray-50">
+                    <td className="p-3">{item.name}</td>
+                    <td className="p-3">Ksh {item.price}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-600 hover:underline text-sm"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div className="mb-4">
-            <label className="block font-semibold mb-1">Select Payment Method:</label>
+            <label className="block font-semibold mb-1">Payment Method</label>
             <select
               value={payment}
               onChange={(e) => setPayment(e.target.value)}
@@ -119,14 +98,14 @@ const Checkout = () => {
             </select>
           </div>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-6 gap-4">
             <h3 className="text-xl font-bold">Total: Ksh {total.toFixed(2)}</h3>
             <button
               onClick={handleConfirm}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? "Processing..." : "Confirm Purchase & Download Receipt"}
+              {loading ? "Processing..." : "Confirm & Generate Receipt"}
             </button>
           </div>
         </div>

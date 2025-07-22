@@ -1,116 +1,66 @@
-import React, { useEffect, useState } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
-import socket from "../socket"; //  ../socket.js exists and exports socket
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Dashboard = () => {
-  const [stats, setStats] = useState({
-    totalSales: "Ksh 45,000",
-    totalProducts: 0,
-    totalCustomers: 53,
-  });
+const Dashboard = ({ user = "Admin" }) => {
+  const [toggle, setToggle] = useState(false);
+  const navigate = useNavigate();
 
-  const [salesData, setSalesData] = useState([
-    { day: "Mon", sales: 5000 },
-    { day: "Tue", sales: 6500 },
-    { day: "Wed", sales: 7000 },
-    { day: "Thu", sales: 4000 },
-    { day: "Fri", sales: 8000 },
-    { day: "Sat", sales: 9000 },
-    { day: "Sun", sales: 3000 },
-  ]);
+  const handleToggle = () => {
+    setToggle(!toggle);
+  };
 
-  const recentOrders = [
-    { id: 1, item: "Milk", amount: "Ksh 300", method: "Mpesa", date: "2025-07-15" },
-    { id: 2, item: "Rice", amount: "Ksh 850", method: "Cash", date: "2025-07-15" },
-    { id: 3, item: "Toothpaste", amount: "Ksh 150", method: "Bank", date: "2025-07-14" },
+  const cards = [
+    { title: "Products", description: "Go to products page", path: "/products" },
+    { title: "Sales", description: "View & manage sales", path: "/sales" },
+    { title: "Inventory", description: "Track stock & items", path: "/inventory" },
+    { title: "Reports", description: "See reports & insights", path: "/reports" },
+    { title: "Checkout", description: "Manage your checkout process", path: "/checkout" },
+    { title: "Register", description: "Create a new account", path: "/register" },
   ];
 
-  // ✅ Real-time socket setup inside useEffect
-  useEffect(() => {
-    socket.on("new-sale", (data) => {
-      console.log("🛒 Real-time Sale:", data);
-      // Optional: Update stats or salesData here
-    });
-
-    return () => {
-      socket.off("new-sale");
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-blue-50 p-8">
-      <div className="bg-white rounded shadow p-6">
-        <h1 className="text-3xl font-bold text-blue-800 mb-2">Welcome to Easymob</h1>
-        <p className="text-lg text-gray-600 mb-6">Making your work easier and organized 🚀</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-800 via-blue-900 to-blue-950 text-white p-8">
+      <div className="max-w-5xl mx-auto bg-blue-900/40 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-blue-700">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-white drop-shadow">Welcome, {user}</h1>
+          <button
+            onClick={handleToggle}
+            className={`px-6 py-2 rounded-full font-semibold shadow transition ${
+              toggle ? "bg-green-400 text-black" : "bg-red-500"
+            }`}
+          >
+            {toggle ? "ON" : "OFF"}
+          </button>
+        </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border-l-4 border-green-500 p-4 shadow rounded">
-            <h3 className="text-sm text-gray-500">Total Sales</h3>
-            <p className="text-xl font-bold text-gray-800">{stats.totalSales}</p>
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+          <div className="bg-blue-800/60 p-4 rounded-xl border border-blue-600 shadow">
+            <h2 className="text-xl font-semibold mb-2 text-white">Users</h2>
+            <p className="text-sm text-blue-200">Total Users: 5</p>
           </div>
-          <div className="bg-white border-l-4 border-blue-500 p-4 shadow rounded">
-            <h3 className="text-sm text-gray-500">Products</h3>
-            <p className="text-xl font-bold text-gray-800">{stats.totalProducts}</p>
-          </div>
-          <div className="bg-white border-l-4 border-purple-500 p-4 shadow rounded">
-            <h3 className="text-sm text-gray-500">Customers</h3>
-            <p className="text-xl font-bold text-gray-800">{stats.totalCustomers}</p>
+
+          <div className="bg-blue-800/60 p-4 rounded-xl border border-blue-600 shadow">
+            <h2 className="text-xl font-semibold mb-2 text-white">Reports</h2>
+            <p className="text-sm text-blue-200">You have 3 new reports.</p>
           </div>
         </div>
 
-        {/* Sales Chart */}
-        <div className="bg-white rounded shadow p-4 mb-8">
-          <h2 className="text-lg font-semibold text-blue-800 mb-2">Weekly Sales Overview</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Recent Orders */}
-        <div className="bg-white rounded shadow p-4 mb-8">
-          <h2 className="text-lg font-semibold text-blue-800 mb-3">Recent Orders</h2>
-          <table className="min-w-full text-sm text-left">
-            <thead className="text-gray-600 border-b">
-              <tr>
-                <th className="py-2 px-3">Item</th>
-                <th className="py-2 px-3">Amount</th>
-                <th className="py-2 px-3">Payment</th>
-                <th className="py-2 px-3">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="border-t hover:bg-gray-50">
-                  <td className="py-2 px-3">{order.item}</td>
-                  <td className="py-2 px-3">{order.amount}</td>
-                  <td className="py-2 px-3">{order.method}</td>
-                  <td className="py-2 px-3">{order.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-sm text-gray-500">
-            Business Mode: <span className="text-green-600 font-semibold">Active</span>
-          </p>
+        {/* Navigation Cards */}
+        <h2 className="text-2xl font-bold mb-4 text-white">Navigate</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cards.map((card, idx) => (
+            <div
+              key={idx}
+              onClick={() => navigate(card.path)}
+              className="cursor-pointer bg-blue-800/40 hover:bg-blue-700 transition p-5 rounded-xl border border-blue-600 shadow hover:scale-105"
+            >
+              <h3 className="text-lg font-semibold text-white">{card.title}</h3>
+              <p className="text-sm text-blue-200">{card.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

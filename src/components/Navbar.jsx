@@ -19,6 +19,9 @@ const Navbar = () => {
             <Link to="/products" className="hover:underline">Products</Link>
             <Link to="/checkout" className="hover:underline">Checkout</Link>
             <Link to="/sales-history" className="hover:underline">Sales History</Link>
+            <Link to="/inventory" className="hover:underline">Inventory</Link>
+            <Link to="/business-register" className="hover:underline">Register</Link>
+            <Link to="/dashboard" className="hover:underline">Dashboard</Link>
           </>
         ) : (
           <Link to="/login" className="hover:underline">Login</Link>
