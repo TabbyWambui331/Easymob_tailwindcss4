@@ -3,20 +3,16 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAkqYZDtYN_jPkNaCNfe8KgRXwyK1A4Y6Y",
-  authDomain: "easymobpos.firebaseapp.com",
-  projectId: "easymobpos",
-  storageBucket: "easymobpos.appspot.com", // FIXED: changed to .appspot.com
-  messagingSenderId: "674255424127",
-  appId: "1:674255424127:web:d6da1cc130bb9e53c30d4a"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// ✅ Export auth and db
 const auth = getAuth(app);
 const db = getFirestore(app);
 
