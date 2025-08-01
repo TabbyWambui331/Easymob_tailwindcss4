@@ -20,7 +20,7 @@ const Checkout = () => {
   const [payment, setPayment] = useState("Cash");
   const [loading, setLoading] = useState(false);
 
-  const { cartItems, addToCart, clearCart, total } = useCart();
+  const { cartItems, addToCart, clearCart, totalPrice } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -67,7 +67,7 @@ const Checkout = () => {
         `Ksh ${item.price}`,
       ]),
     });
-    doc.text(`Total: Ksh ${total}`, 14, doc.autoTable.previous.finalY + 10);
+    doc.text(`Total: Ksh ${totalPrice}`, 14, doc.autoTable.previous.finalY + 10);
     doc.text(`Payment Method: ${payment}`, 14, doc.autoTable.previous.finalY + 20);
     doc.text(`Receipt ID: ${id}`, 14, doc.autoTable.previous.finalY + 30);
     doc.save(`receipt-${id}.pdf`);
@@ -83,7 +83,7 @@ const Checkout = () => {
     try {
       const docRef = await addDoc(collection(db, "sales"), {
         items: cartItems,
-        total,
+        total: totalPrice,
         paymentMethod: payment,
         createdAt: serverTimestamp(),
       });
@@ -162,7 +162,7 @@ const Checkout = () => {
             ))}
           </ul>
           <div className="mb-4 font-semibold text-right">
-            Total: Ksh {total}
+            Total: Ksh {totalPrice}
           </div>
 
           <div className="mb-4">
