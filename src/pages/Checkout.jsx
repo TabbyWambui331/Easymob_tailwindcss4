@@ -182,7 +182,7 @@ const Checkout = () => {
 
           <button
             onClick={handleConfirm}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+            className="bg-green-600 text-blue px-6 py-2 rounded hover:bg-green-700"
             disabled={loading}
           >
             {loading ? "Processing..." : "Confirm & Pay"}
